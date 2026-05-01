@@ -1,0 +1,141 @@
+import java.util.ArrayList;
+import java.util.Scanner;
+
+// --- 類別定義 ---
+
+class Person {
+    protected String name;
+
+    public Person(String name) {
+        this.name = name;
+    }
+}
+
+class User extends Person {
+    private String username;
+    private String password;
+    private String role; // 儲存角色身分 (ADMIN 或 STANDARD_USER)
+
+    public User(String name, String username, String password, String role) {
+        super(name);
+        this.username = username;
+        this.password = password;
+        this.role = role;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public String getRole() {
+        return role;
+    }
+
+    public boolean checkPassword(String pw) {
+        return this.password.equals(pw);
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public void showRole() {
+        System.out.println("Welcome, " + name + " (" + role + ")");
+    }
+}
+
+// --- 主程式 ---
+
+public class UserLogin {
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        ArrayList<User> userList = new ArrayList<>();
+
+        // 預設加入圖片中的初始帳號
+        userList.add(new User("System Admin", "admin", "admin123", "ADMIN"));
+        userList.add(new User("Default Student", "student", "1234", "STANDARD_USER"));
+
+        boolean running = true;
+
+        while (running) {
+            System.out.println("\n=== Terminal Login Management System ===");
+            System.out.println("1) Register");
+            System.out.println("2) Login");
+            System.out.println("3) List Users");
+            System.out.println("4) Exit");
+            System.out.print("Choose an option: ");
+
+            String choice = sc.nextLine();
+
+            switch (choice) {
+                case "1": // 註冊功能
+                    System.out.print("Enter username: ");
+                    String regUser = sc.nextLine();
+                    System.out.print("Enter password: ");
+                    String regPw = sc.nextLine();
+                    System.out.print("Enter display name: ");
+                    String regName = sc.nextLine();
+                    System.out.print("Register as admin? (y/n): ");
+                    String isAdmin = sc.nextLine();
+                    
+                    String role = isAdmin.equalsIgnoreCase("y") ? "ADMIN" : "STANDARD_USER";
+                    userList.add(new User(regName, regUser, regPw, role));
+                    System.out.println("Registration successful.");
+                    break;
+
+                case "2": // 登入功能
+                    System.out.print("Enter username: ");
+                    String loginId = sc.nextLine();
+                    System.out.print("Enter password: ");
+                    String loginPw = sc.nextLine();
+
+                    User foundUser = null;
+                    for (User u : userList) {
+                        if (u.getUsername().equals(loginId) && u.checkPassword(loginPw)) {
+                            foundUser = u;
+                            break;
+                        }
+                    }
+
+                    if (foundUser != null) {
+                        if (foundUser.getRole().equals("ADMIN")) {
+                            System.out.println("Admin panel access granted.");
+                        }
+                        foundUser.showRole();
+                        
+                        // 圖片中的修改密碼詢問
+                        System.out.print("Do you want to change your password? (y/n): ");
+                        if (sc.nextLine().equalsIgnoreCase("y")) {
+                            System.out.print("Enter new password: ");
+                            foundUser.setPassword(sc.nextLine());
+                            System.out.println("Password updated.");
+                        }
+                    } else {
+                        System.out.println("Login failed. Invalid username or password.");
+                    }
+                    break;
+
+                case "3": // 列出所有使用者
+                    System.out.println("\n=== Registered Users ===");
+                    for (int i = 0; i < userList.size(); i++) {
+                        User u = userList.get(i);
+                        System.out.println((i + 1) + ". " + u.getUsername() + " | " + u.getName() + " | " + u.getRole());
+                    }
+                    break;
+
+                case "4": // 離開
+                    System.out.println("Goodbye!");
+                    running = false;
+                    break;
+
+                default:
+                    System.out.println("Invalid option, please try again.");
+            }
+        }
+        sc.close();
+    }
+}
